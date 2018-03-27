@@ -1,1 +1,2 @@
-# assignment1
+# assignment1 finished
+# assignment1 to do
