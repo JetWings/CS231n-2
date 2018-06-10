@@ -244,7 +244,7 @@ def batchnorm_backward(dout, cache):
 
     dbeta = np.sum(dout,axis=0,keepdims=True)
     dxhat = dout*gamma
-    dgamma = np.sum(dout*hat, axis=0,True)
+    dgamma = np.sum(dout*xhat, axis=0,True)
 
     xmu = x-sample_mean
     ivar = 1./np.sqrt(sample_var+eps)
