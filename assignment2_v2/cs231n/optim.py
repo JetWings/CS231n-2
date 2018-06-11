@@ -150,14 +150,24 @@ def adam(w, dw, config=None):
     # NOTE: In order to match the reference output, please modify t _before_  #
     # using it in any calculations.                                           #
     ###########################################################################
-    config['t']+=1
+    
     m = config['beta1']*config['m']+(1-config['beta1'])*dw
     v = config['beta2']*config['v']+(1-config['beta2'])*dw*dw
+    config['t']+=1
     mt = m/(1-config['beta1']**config['t'])
     vt = v/(1-config['beta2']**config['t'])
-    next_w = w - config['learning_rate']*mt/(np.square(vt)+config['epsilon'])
+    next_w = w - config['learning_rate']*mt/(np.sqrt(vt)+config['epsilon'])
     config['m'] = m
     config['v'] = v
+
+    # m = config['m']*config['beta1']+(1-config['beta1'])*dw
+    # v = config['v']*config['beta2']+(1-config['beta2'])*dw*dw
+    # config['t'] += 1
+    # mb = m / (1 - config['beta1']**config['t'])
+    # vb = v / (1 - config['beta2']**config['t'])
+    # next_w = w - config['learning_rate']*mb/(np.sqrt(vb)+config['epsilon'])
+    # config['m'] = m
+    # config['v'] = v
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
