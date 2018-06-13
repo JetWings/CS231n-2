@@ -340,7 +340,15 @@ def layernorm_forward(x, gamma, beta, ln_param):
     # transformations you could perform, that would enable you to copy over   #
     # the batch norm code and leave it almost unchanged?                      #
     ###########################################################################
-    pass
+    N,D= x.shape
+    x_mean = np.mean(x,axis=1).reshape(N,1)
+    x_var = np.var(x,axis=1).reshape(N,1)
+
+    xmu = x-x_mean
+    xivar = np.sqrt(x_var+eps)
+
+    out = gamma*xmu/xivar + beta
+    cache = (x, xmu, xivar, gamma)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -371,7 +379,20 @@ def layernorm_backward(dout, cache):
     # implementation of batch normalization. The hints to the forward pass    #
     # still apply!                                                            #
     ###########################################################################
-    pass
+    (x, xmu, xivar, gamma) = cache
+    N,D= x.shape
+    
+    dgamma = np.sum(dout*xmu/xivar,axis=0,keepdims=True)
+    dbeta = np.sum(dout,axis=0,keepdims=True)
+
+    dlxhat = dout*gamma
+    dxhatx = 1/xivar
+    dlvar = -0.5*np.sum(gamma*xmu*xivar**(-3)*dout,axis=1,keepdims=True)
+    dlvarx = 2*xmu/D
+    dlmu = -1.*np.sum(dlxhat/xivar,axis=1,keepdims=True)-2.*np.sum(dlvar*xmu,axis=1,keepdims=True)/D
+
+
+    dx = dlxhat*dxhatx + dlvar*dlvarx + dlmu/D
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -408,15 +429,15 @@ def dropout_forward(x, dropout_param):
     if 'seed' in dropout_param:
         np.random.seed(dropout_param['seed'])
 
-    mask = None
-    out = None
+    mask = np.random.rand(*x.shape)<p
+    out = x*mask/p
 
     if mode == 'train':
         #######################################################################
         # TODO: Implement training phase forward pass for inverted dropout.   #
         # Store the dropout mask in the mask variable.                        #
         #######################################################################
-        pass
+        out = x*mask
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -424,7 +445,7 @@ def dropout_forward(x, dropout_param):
         #######################################################################
         # TODO: Implement the test phase forward pass for inverted dropout.   #
         #######################################################################
-        pass
+        out = x
         #######################################################################
         #                            END OF YOUR CODE                         #
         #######################################################################
@@ -451,7 +472,7 @@ def dropout_backward(dout, cache):
         #######################################################################
         # TODO: Implement training phase backward pass for inverted dropout   #
         #######################################################################
-        pass
+        dx = dout*mask
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -493,7 +514,7 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    pass
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

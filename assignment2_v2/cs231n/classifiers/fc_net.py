@@ -258,14 +258,17 @@ class FullyConnectedNet(object):
             if self.normalization:
                 beta, gamma = self.params['beta' + str(i+1)], self.params['gamma' + str(i+1)]
                 out[i], cache0[i] = affine_forward(out[i],w,b)
-                out[i], cache1[i] = batchnorm_forward(out[i],gamma,beta,self.bn_params[i])
+                if self.normalization=='batchnorm':
+                    out[i], cache1[i] = batchnorm_forward(out[i],gamma,beta,self.bn_params[i])
+                else:
+                    out[i], cache1[i] = batchnorm_forward(out[i],gamma,beta,self.bn_params[i])
                 out[i+1], cache2[i] = relu_forward(out[i])
                 if self.use_dropout:
-                    out[i+1], cache3[i] = dropout_forward(out[i+1],self.dropout_param[i]) #out[i+1]是要作为下一次的起始输入
+                    out[i+1], cache3[i] = dropout_forward(out[i+1],self.dropout_param) #out[i+1]是要作为下一次的起始输入
             else:
                 out[i+1], cache2[i] = affine_relu_forward(out[i],w,b)
                 if self.use_dropout:
-                    out[i+1], cache3[i] = dropout_forward(out[i+1],self.dropout_param[i]) #隐藏层循环 n-1 次
+                    out[i+1], cache3[i] = dropout_forward(out[i+1],self.dropout_param) #隐藏层循环 n-1 次
         
         w, b = self.params['W'+str(self.num_layers)], self.params['b'+str(self.num_layers)]
         scores, cache = affine_forward(out[self.num_layers - 1], w, b)
@@ -307,8 +310,12 @@ class FullyConnectedNet(object):
             if self.normalization:
                 if self.use_dropout:
                     dout[f-i]  = dropout_backward(dout[f-i],cache3[f-i-1])
+                    dout[f-i]  = dropout_backward(dout[f-i],cache3[f-i-1])
                 dout[f-i-1] =relu_backward(dout[f-i],cache2[f-i-1])
-                dout[f-i-1], grads['gamma'+str(f-i)], grads['beta'+str(f-i)] = batchnorm_backward(dout[f-i-1],cache1[f-i-1])
+                if self.normalization=='batchnorm':
+                    dout[f-i-1], grads['gamma'+str(f-i)], grads['beta'+str(f-i)] = batchnorm_backward(dout[f-i-1],cache1[f-i-1])
+                else:
+                    dout[f-i-1], grads['gamma'+str(f-i)], grads['beta'+str(f-i)] = batchnorm_backward(dout[f-i-1],cache1[f-i-1])
                 dout[f-i-1], grads['W'+str(f-i)], grads['b'+str(f-i)] = affine_backward(dout[f-i-1],cache0[f-i-1])
 
             else:
