@@ -1,2 +1,2 @@
 # assignment1 finished
-# assignment2 to do
+# assignment2 pytorch version finished
